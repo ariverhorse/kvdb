@@ -3,7 +3,6 @@ project(kvdb)
 
 set(CMAKE_CXX_STANDARD 11)
 
-
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in
         googletest-download/CMakeLists.txt)
@@ -29,13 +28,15 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
     include_directories("${gtest_SOURCE_DIR}/include"
             "${gmock_SOURCE_DIR}/include")
 endif()
-
 # Now simply link your own targets against gtest, gmock,
 # etc. as appropriate
 
 include_directories(include)
+
+set(SOURCE_FILES src/string_view.cpp)
+add_library(kvdb ${SOURCE_FILES})
+
 enable_testing()
 add_subdirectory(test)
 
-#set(SOURCE_FILES test/string_view_test.cpp)
-#add_library(TestExample ${SOURCE_FILES})
+

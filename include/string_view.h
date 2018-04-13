@@ -26,12 +26,7 @@ class string_view {
   string_view(const std::string& str)
    : start_(str.c_str()), length_(str.length()) {}
 
-  void remove_prefix(size_t n) {
-		size_t m = std::min(n, length_);
-		start_ += m;
-    length_ -= m;
-  }
-
+  void remove_prefix(size_t n); 
 	bool empty() const {
 		return (length_ == 0);	
 	}
@@ -40,10 +35,8 @@ class string_view {
 		return start_[idx];
 	}
 
-	std::string tostring() {
-		return std::string(start_, length_);
-	}
-
+	std::string tostring();
+ 
  private:
 	const char* start_;
   size_t length_;	
