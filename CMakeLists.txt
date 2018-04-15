@@ -31,9 +31,10 @@ endif()
 # Now simply link your own targets against gtest, gmock,
 # etc. as appropriate
 
-include_directories(include)
 
-set(SOURCE_FILES src/string_view.cpp)
+include_directories("${PROJECT_SOURCE_DIR}")
+
+set(SOURCE_FILES util/string_view.cpp)
 add_library(kvdb ${SOURCE_FILES})
 
 enable_testing()
