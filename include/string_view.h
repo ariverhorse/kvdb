@@ -13,29 +13,36 @@ namespace util {
 
 class string_view {
  public:
-	string_view() : start_(nullptr), length_(0) { }
 
-  string_view(const string_view& other) {
-	  start_ = other.start_;
-	  length_ = other.length_;
-  }
+	string_view();
 
-  string_view(const char* s, size_t len)
-   : start_(s), length_(len) {}
+  string_view(const char* s, size_t len);
 
-  string_view(const std::string& str)
-   : start_(str.c_str()), length_(str.length()) {}
+	string_view(const char* s);
 
+  string_view(const std::string& str);
+
+  string_view(const string_view& other);
+
+	string_view& operator=(const string_view& other);
+  
   void remove_prefix(size_t n); 
-	bool empty() const {
-		return (length_ == 0);	
-	}
 
-	const char& operator[](size_t idx) const {
-		return start_[idx];
-	}
+	bool empty() const;
 
+	size_t length() const;
+
+	size_t size() const;
+
+	const char operator[](size_t idx) const;
+ 
 	std::string tostring();
+
+	bool starts_with(const char* str) const;
+
+	bool starts_with(const string_view& other) const;
+
+	const char* data() const;
  
  private:
 	const char* start_;
