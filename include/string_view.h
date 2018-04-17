@@ -7,42 +7,42 @@
 namespace kvdb {
 namespace util {
 
-// This is a string_view implementation that provide similar functionality as 
+// This is a Stringview implementation that provide similar functionality as 
 // std::string_view in c++17 (I don't have g++ support for c++17 yet, so just
 // build one for now, will replace it with std::string_view when it is available)
 
-class string_view {
+class Stringview {
  public:
 
-	string_view();
+	Stringview();
 
-  string_view(const char* s, size_t len);
+  Stringview(const char* s, size_t len);
 
-	string_view(const char* s);
+	Stringview(const char* s);
 
-  string_view(const std::string& str);
+  Stringview(const std::string& str);
 
-  string_view(const string_view& other);
+  Stringview(const Stringview& other);
 
-	string_view& operator=(const string_view& other);
+	Stringview& operator=(const Stringview& other);
   
-  void remove_prefix(size_t n); 
+  void RemovePrefix(size_t n); 
 
-	bool empty() const;
+	bool Empty() const;
 
-	size_t length() const;
+	size_t Length() const;
 
-	size_t size() const;
+	size_t Size() const;
 
 	const char operator[](size_t idx) const;
  
-	std::string tostring();
+	std::string ToString() const;
 
-	bool starts_with(const char* str) const;
+	bool StartsWith(const char* str) const;
 
-	bool starts_with(const string_view& other) const;
+	bool StartsWith(const Stringview& other) const;
 
-	const char* data() const;
+	const char* Data() const;
  
  private:
 	const char* start_;

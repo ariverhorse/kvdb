@@ -5,24 +5,24 @@
 namespace kvdb {
 namespace util {
 
-string_view::string_view()
+Stringview::Stringview()
   : start_(nullptr), length_(0) {}
 
-string_view::string_view(const char* s, size_t len)
+Stringview::Stringview(const char* s, size_t len)
   : start_(s), length_(len) {}
 
-string_view::string_view(const char* s)
+Stringview::Stringview(const char* s)
 	: start_(s), length_(strlen(s)) {} 
 
-string_view::string_view(const std::string& str)
+Stringview::Stringview(const std::string& str)
   : start_(str.c_str()), length_(str.length()) {}
 
-string_view::string_view(const string_view& other) {
+Stringview::Stringview(const Stringview& other) {
   start_ = other.start_;
 	length_ = other.length_;
 }
 
-string_view& string_view::operator=(const string_view& other) {
+Stringview& Stringview::operator=(const Stringview& other) {
 	if(this != &other) { 
 		start_ = other.start_;
 		length_ = other.length_;
@@ -30,47 +30,47 @@ string_view& string_view::operator=(const string_view& other) {
 	return *this;	
 }
 
-void string_view::remove_prefix(size_t n) {
+void Stringview::RemovePrefix(size_t n) {
 	assert(n<=length_);
 	start_ += n;
   length_ -= n;
 }
 
-bool string_view::empty() const {
+bool Stringview::Empty() const {
 	return (length_ == 0);	
 }
 
-const char string_view::operator[](size_t idx) const {
+const char Stringview::operator[](size_t idx) const {
 	return start_[idx];
 }
 
-size_t string_view::size() const {
+size_t Stringview::Size() const {
 	return length_;
 }
 
-size_t string_view::length() const {
+size_t Stringview::Length() const {
 	return length_;
 }
 
-std::string string_view::tostring() {
+std::string Stringview::ToString() const {
 	return std::string(start_, length_);
 }
 
 
-bool string_view::starts_with(const char* str) const {
+bool Stringview::StartsWith(const char* str) const {
 	size_t len = strlen(str);
 	return (len <= length_) && 
 				 (strncmp(start_, str, len)==0);
 }
 
-bool string_view::starts_with(const string_view& other) const {
+bool Stringview::StartsWith(const Stringview& other) const {
 	return (other.length_ <= length_) &&
          (strncmp(start_, other.start_, other.length_)==0);
 }
 
-const char* string_view::data() const {
+const char* Stringview::Data() const {
 	return start_;
 }
 
-}
-}
+} //namespace util
+} //namespace kvdb
