@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(kvdb)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 # Download and unpack googletest at configure time
 configure_file(CMakeLists.txt.in
@@ -34,7 +34,7 @@ endif()
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
-set(SOURCE_FILES util/string_view.cpp util/status.cpp)
+set(SOURCE_FILES util/string_view.cpp util/status.cpp util/file.cpp)
 add_library(kvdb ${SOURCE_FILES})
 
 enable_testing()

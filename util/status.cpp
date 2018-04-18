@@ -27,6 +27,10 @@ Status& Status::operator=(const Status& s) {
 	return *this;
 }
 
+Status Status::OK() {
+	return Status();
+}
+
 Status Status::NotFound(const Stringview& msg1, const Stringview& msg2) {
 	return Status(Code::kNotFound, msg1, msg2);
 }

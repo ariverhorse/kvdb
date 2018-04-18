@@ -8,3 +8,7 @@ add_executable(status_test status_test.cpp)
 target_link_libraries(status_test kvdb gtest gmock_main)
 add_test(NAME status_test COMMAND status_test)
 
+add_executable(file_test file_test.cpp)
+target_link_libraries(file_test kvdb gtest gmock_main)
+add_test(NAME file_test COMMAND file_test)
+

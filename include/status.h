@@ -15,7 +15,9 @@ class Status {
 	Status(const Status& s);
   Status& operator=(const Status& s);
 
-  static Status NotFound(const Stringview& msg1, const Stringview& msg2 = Stringview());
+  static Status OK();
+  
+	static Status NotFound(const Stringview& msg1, const Stringview& msg2 = Stringview());
 
   static Status Corruption(const Stringview& msg1, const Stringview& msg2 = Stringview());
 
