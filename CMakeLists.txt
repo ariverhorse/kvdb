@@ -34,7 +34,7 @@ endif()
 
 include_directories("${PROJECT_SOURCE_DIR}")
 
-set(SOURCE_FILES util/string_view.cpp util/status.cpp util/file.cpp)
+set(SOURCE_FILES util/string_view.cpp util/status.cpp util/file.cpp util/varint.cpp)
 add_library(kvdb ${SOURCE_FILES})
 
 enable_testing()

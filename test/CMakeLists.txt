@@ -12,3 +12,8 @@ add_executable(file_test file_test.cpp)
 target_link_libraries(file_test kvdb gtest gmock_main)
 add_test(NAME file_test COMMAND file_test)
 
+add_executable(varint_test varint_test.cpp)
+target_link_libraries(varint_test kvdb gtest gmock_main)
+add_test(NAME varint_test COMMAND varint_test)
+
+
