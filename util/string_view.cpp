@@ -72,5 +72,16 @@ const char* Stringview::Data() const {
 	return start_;
 }
 
+bool operator==(const Stringview& sv1, const Stringview& sv2) {
+	return (sv1.Size() == sv2.Size()) && 
+				 (strncmp(sv1.Data(), sv2.Data(), sv1.Size())==0);
+}
+
+bool operator==(const Stringview& sv1, const std::string& buf) {
+	return (sv1.Size() == buf.length()) && 
+				 (strncmp(sv1.Data(), buf.c_str(), sv1.Size())==0);
+}
+
+
 } //namespace util
 } //namespace kvdb

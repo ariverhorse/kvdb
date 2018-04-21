@@ -49,6 +49,9 @@ class Stringview {
   size_t length_;	
 };
 
+bool operator==(const Stringview& sv1, const Stringview& sv2);
+bool operator==(const Stringview& sv1, const std::string& buf);
+
 } //namespace util
 } //namespace kvdb
 

@@ -11,11 +11,13 @@ void PutFix32(std::string& buf, uint32_t data);
 void PutFix64(std::string& buf, uint64_t data);
 void PutVar32(std::string& buf, uint32_t data);
 void PutVar64(std::string& buf, uint64_t data);
+void PutLengthPrefixedString(std::string& buf, const Stringview& sv);
 
-void GetFix32(Stringview& buf, uint32_t& data);
-void GetFix64(Stringview& buf, uint64_t& data);
-void GetVar32(Stringview& buf, uint32_t& data);
-void GetVar64(Stringview& buf, uint64_t& data);
+bool GetFix32(Stringview& buf, uint32_t& data);
+bool GetFix64(Stringview& buf, uint64_t& data);
+bool GetVar32(Stringview& buf, uint32_t& data);
+bool GetVar64(Stringview& buf, uint64_t& data);
+bool GetLengthPrefixedString(Stringview& input, Stringview& output);
 
 
 } //namespace util
