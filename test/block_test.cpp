@@ -57,6 +57,22 @@ TEST(BlockTest, BlockHandle) {
 	ASSERT_EQ(test.Size(), size);
 }
 
+
+TEST(BlockTest, HeaderTest) {
+	uint32_t offset = 17891;
+	uint32_t size = 1239;
+	BlockHandle index(offset, size);
+	Header header(index);
+	std::string buf;
+	header.EncodeTo(buf);
+	Header test;
+	util::Stringview sv(buf);
+	test.DecodeFrom(sv);
+	auto testhandler = test.IndexHandle();
+	ASSERT_EQ(testhandler.Offset(), offset);
+	ASSERT_EQ(testhandler.Size(), size);
+}
+
 } //namespace table
 } //namespace kvdb
 

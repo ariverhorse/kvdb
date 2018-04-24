@@ -18,6 +18,7 @@
 // We don't do prefix comrpession here, and no block compression
 
 #include <string>
+#include <cassert>
 #include "include/string_view.h"
 #include "include/varint.h"
 
@@ -110,9 +111,11 @@ class BlockBuilder {
 //Block handle contens the location and size of the block 
 class BlockHandle {
 	public:
+		const static int kBlockHandleSize = 10;
 		BlockHandle() : offset_(0), size_(0) {}
 		BlockHandle(uint32_t offset, uint32_t size)
 			: offset_(offset), size_(size) { }
+		BlockHandle(const BlockHandle&) = default;
 		uint32_t Offset() { return offset_; }
 		uint32_t Size() { return size_; }
 		void SetOffset(uint32_t offset) {  offset_ = offset; }
@@ -130,6 +133,37 @@ class BlockHandle {
 		uint32_t size_;
 };
 
+
+class Header {
+	public:
+		const static int kHeaderSize = BlockHandle::kBlockHandleSize + 8; 
+		const static uint64_t kMagicNumber = 0x1122334455667788;
+		Header() = default;
+		Header(BlockHandle& handle) : index_handle_(handle) {
+			
+		}
+		~Header() = default;
+    
+		void EncodeTo(std::string& buf) {
+			util::PutFix64(buf, kMagicNumber);
+			std::string index_handle_buf;
+			index_handle_.EncodeTo(index_handle_buf);
+			index_handle_buf.resize(BlockHandle::kBlockHandleSize);
+			buf.append(index_handle_buf);
+		}
+
+		void DecodeFrom(util::Stringview sv) {
+			uint64_t magicword;
+			util::GetFix64(sv, magicword);
+			assert(magicword == kMagicNumber);
+			index_handle_.DecodeFrom(sv);	
+		}
+
+		BlockHandle IndexHandle() { return index_handle_; }
+	
+	private:
+		BlockHandle index_handle_;
+};
 
 
 
