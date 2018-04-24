@@ -27,12 +27,8 @@ namespace table {
 // A data block contains key value pair
 class Block {
 	public:
-		Block() = default;
+		explicit Block(const util::Stringview content) : content_(content) { }
     virtual ~Block() = default;
-
-		virtual void Add(const util::Stringview& key,
-										 const util::Stringview& value);
-		virtual void Finish();
 
 		//class Iterator;
     class Iterator {
@@ -90,13 +86,51 @@ class Block {
     		}	
     };
 
-		size_t Size();
 		Iterator Begin(); 
 		Iterator End();
 
 	private:
+		util::Stringview content_;	
+};
+
+// A data block contains key value pair
+class BlockBuilder {
+	public:
+		BlockBuilder() = default;
+    virtual ~BlockBuilder() = default;
+
+		virtual void Add(const util::Stringview& key,
+										 const util::Stringview& value);
+		virtual util::Stringview Finish();
+
+	private:
 		std::string content_;	
 };
+
+//Block handle contens the location and size of the block 
+class BlockHandle {
+	public:
+		BlockHandle() : offset_(0), size_(0) {}
+		BlockHandle(uint32_t offset, uint32_t size)
+			: offset_(offset), size_(size) { }
+		uint32_t Offset() { return offset_; }
+		uint32_t Size() { return size_; }
+		void SetOffset(uint32_t offset) {  offset_ = offset; }
+		void SetSize(uint32_t size) { size_ = size; }
+		void EncodeTo(std::string& buf) {
+			util::PutVar32(buf, offset_);
+			util::PutVar32(buf, size_);
+		}
+		void DecodeFrom(util::Stringview sv) {
+			util::GetVar32(sv, offset_);
+			util::GetVar32(sv, size_);
+		}	
+	private:
+		uint32_t offset_;
+		uint32_t size_;
+};
+
+
 
 
 }//namespace table

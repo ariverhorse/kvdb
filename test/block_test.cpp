@@ -10,7 +10,7 @@
 namespace kvdb {
 namespace table {
 
-TEST(BlockTest, normal) {
+TEST(BlockTest, BlockWriteAndRead) {
 	std::vector<std::pair<std::string, std::string>> data={
 		{"K1", "1234"},
 		{"KxxxEY2", "56789"},
@@ -23,11 +23,14 @@ TEST(BlockTest, normal) {
 		{"KkkkkkkkkkkEY9", "hello world"}
 	};
 
-	Block block;
+	BlockBuilder block_builder;
 	for(auto& dt : data) {
-		block.Add(dt.first, dt.second);
+		block_builder.Add(dt.first, dt.second);
 	}
 
+	auto buf = block_builder.Finish();
+
+	Block block(buf);
 	auto begin = block.Begin();
 	auto end = block.End();
 	int i=0;
@@ -39,6 +42,19 @@ TEST(BlockTest, normal) {
 		++begin;
 	}
 
+}
+
+TEST(BlockTest, BlockHandle) {
+	uint32_t offset = 17891;
+	uint32_t size = 1239;
+	BlockHandle handle(offset, size);
+	std::string buf;
+  handle.EncodeTo(buf);
+	BlockHandle test;
+	util::Stringview sv(buf);
+	test.DecodeFrom(sv);
+	ASSERT_EQ(test.Offset(), offset);
+	ASSERT_EQ(test.Size(), size);
 }
 
 } //namespace table
