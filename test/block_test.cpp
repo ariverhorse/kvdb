@@ -12,11 +12,15 @@ namespace table {
 
 TEST(BlockTest, normal) {
 	std::vector<std::pair<std::string, std::string>> data={
-		{"KEY1", "1234"},
-		{"KEY2", "56789"},
-		{"KEY3", "00000000000"},
-		{"KEY4", "pyt"},
-		{"KEY5", "hello world"}
+		{"K1", "1234"},
+		{"KxxxEY2", "56789"},
+		{"KrrrrrrrrrrY3", "00000000000"},
+		{"4", "pyt"},
+		{"Kk5", "hello world"},
+		{"KEY6", "This is sstable"},
+		{"KEY7", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},
+		{"KEY8", "oooooooooooo"},
+		{"KkkkkkkkkkkEY9", "hello world"}
 	};
 
 	Block block;

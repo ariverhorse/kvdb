@@ -90,6 +90,7 @@ class Block {
     		}	
     };
 
+		size_t Size();
 		Iterator Begin(); 
 		Iterator End();
 

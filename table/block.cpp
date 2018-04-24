@@ -16,6 +16,9 @@ void Block::Finish() {
   //should be used to build the restart point index
 }
 
+size_t Block::Size() {
+	return content_.size();
+}
 
 Block::Iterator Block::Begin() {
 	return Block::Iterator(*this);
