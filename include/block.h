@@ -134,15 +134,15 @@ class BlockHandle {
 };
 
 
-class Header {
+class Footer {
 	public:
-		const static int kHeaderSize = BlockHandle::kBlockHandleSize + 8; 
+		const static int kFooterSize = BlockHandle::kBlockHandleSize + 8; 
 		const static uint64_t kMagicNumber = 0x1122334455667788;
-		Header() = default;
-		Header(BlockHandle& handle) : index_handle_(handle) {
+		Footer() = default;
+		Footer(BlockHandle& handle) : index_handle_(handle) {
 			
 		}
-		~Header() = default;
+		~Footer() = default;
     
 		void EncodeTo(std::string& buf) {
 			util::PutFix64(buf, kMagicNumber);

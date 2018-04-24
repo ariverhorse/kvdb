@@ -58,14 +58,14 @@ TEST(BlockTest, BlockHandle) {
 }
 
 
-TEST(BlockTest, HeaderTest) {
+TEST(BlockTest, FooterTest) {
 	uint32_t offset = 17891;
 	uint32_t size = 1239;
 	BlockHandle index(offset, size);
-	Header header(index);
+  Footer footer(index);
 	std::string buf;
-	header.EncodeTo(buf);
-	Header test;
+	footer.EncodeTo(buf);
+	Footer test;
 	util::Stringview sv(buf);
 	test.DecodeFrom(sv);
 	auto testhandler = test.IndexHandle();
