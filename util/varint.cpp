@@ -82,37 +82,55 @@ void PutVar64(std::string& buf, uint64_t data){
 
 }
 
-	
-bool GetVar32(Stringview& buf, uint32_t& data) {
+
+const char* GetVar32Ptr(const char* start, const char* end, uint32_t& data) {
 	uint32_t mask = 0x7f;
 	uint32_t morebit = 0x80;
-	int count = 0;
+	const char* p = start;
 	data = 0;
-	for(int i=0; i<buf.Size() && count<5; ++i) {
-		data |= (static_cast<unsigned char>(buf[i]) & mask)<<(i*7);		
-		++count;
-		if((static_cast<unsigned char>(buf[i]) & morebit)==0) {
-			buf.RemovePrefix(count);
-			return true;
+	for(int count=0; p!=end && count<5; ++count) {
+		unsigned char cur = static_cast<unsigned char>(*p);
+	  data |= (cur & mask)<<(count*7);		
+		++p;
+		if((cur & morebit)==0) {
+			return p;
 		}
 	}
-	return false;
+	return NULL;
+}
+
+	
+bool GetVar32(Stringview& buf, uint32_t& data) {
+	const char* p = GetVar32Ptr(buf.Data(), buf.Data()+buf.Size(), data);
+	if(p!=NULL) {
+		buf.RemovePrefix(p-buf.Data());
+	}
+	return p!=NULL;	
+}
+
+
+const char* GetVar64Ptr(const char* start, const char* end, uint64_t& data) {
+	uint64_t mask = 0x7f;
+	uint64_t morebit = 0x80;
+	const char* p = start;
+	data = 0;
+	for(int count=0; p!=end && count < 10; ++count) {
+		unsigned char cur = static_cast<unsigned char>(*p);
+		data |= (cur & mask)<<(count*7);		
+		++p;
+		if((cur & morebit)==0) {
+			return p; 
+		}
+	}
+	return NULL;
 }
 
 bool GetVar64(Stringview& buf, uint64_t& data) {
-	uint64_t mask = 0x7f;
-	uint64_t morebit = 0x80;
-	int count = 0;
-	data = 0;
-	for(int i=0; i<buf.Size() && count < 10; ++i) {
-		data |= (static_cast<unsigned char>(buf[i]) & mask)<<(i*7);		
-		++count;
-		if((static_cast<unsigned char>(buf[i]) & morebit)==0) {
-			buf.RemovePrefix(count);
-			return true;
-		}
+	const char* p = GetVar64Ptr(buf.Data(), buf.Data()+buf.Size(), data);
+	if(p!=NULL) {
+		buf.RemovePrefix(p-buf.Data());
 	}
-	return false;
+	return p!=NULL;	
 }
 
 

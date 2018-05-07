@@ -8,7 +8,11 @@ namespace table {
 namespace {
 	class BlockIterator : public Iterator {
 		public:
-			BlockIterator(const Block& block) : buf_(block.content_.c_str()) {
+			BlockIterator(const Block& block)
+				: buf_(block.Content().c_str()),
+					size_(block.Content().size()),
+					end_(buf_+size_),
+					next_(buf_) {
 
 			}
 
@@ -16,20 +20,22 @@ namespace {
 				return key_.Size()!=0;
 			}
 
-			Stringview Key() const {
+			util::Stringview Key() const {
 				return key_;
 			}
 
-			Stringview Value() const {
+			util::Stringview Value() const {
 				return value_;
 			}
 
 			void SeekToFirst() {
-				
+				next_ = buf_;
+				_ParseNextEntry();		
 			}
 
 			void Next() {
-
+				next_ = value_.Data()+value_.Size();
+				_ParseNextEntry();
 			}
 
 			void Prev() {
@@ -40,76 +46,27 @@ namespace {
 
 			}
 
-			void Seek(const Stringview& target) {
+			void Seek(const util::Stringview& target) {
 
 
 			}
 
 		private:
 			const char* buf_;
+			int size_;
+			const char* end_;
+			const char* next_;
+			util::Stringview key_;
+			util::Stringview value_;
     	void _ParseNextEntry() {
-    		GetLengthPrefixedString(sv_, key_);
-    		GetLengthPrefixedString(sv_, value_);
+				key_ = util::Stringview();
+				value_ = util::Stringview();
+				util::Stringview sv(next_, end_-next_);
+    		GetLengthPrefixedString(sv, key_);
+    		GetLengthPrefixedString(sv, value_);
     	}	
 
 	};
-
-	/*
-    class Iterator {
-    	public:
-    		Iterator(const Block& block) : sv_(block.content_), eof_(false) {
-    			_ParseNextEntry();	
-    		}
-    	
-    		Iterator() : sv_(""), eof_(true) {
-    		}
-    
-    		Iterator(const Iterator&) = default;
-    		Iterator& operator=(const Iterator&) = default;
-    	
-    		std::pair<util::Stringview, util::Stringview> operator*() {
-    			return std::make_pair(key_, value_);
-    		}
-    
-    		Iterator& operator++() {
-    			if(sv_.Size()>0) {
-    				_ParseNextEntry();
-    			} else if (sv_.Size()==0) {
-						eof_ = true;
-					} 
-    			return *this;
-    		}
-    
-    		Iterator operator++(int) {
-    			Iterator tmp = *this;
-    			if(sv_.Size()>0) {
-    				_ParseNextEntry();
-    			}
-    			return tmp; 
-    		}
-    		
-    		bool operator==(const Iterator& other) {
-    			return this->sv_.Data() == other.sv_.Data()&&
-    						 this->sv_.Size() == other.sv_.Size() ||
-								 this->sv_.Size()==0 && other.sv_.Size()==0 && 
-								 this->eof_ == other.eof_;
-    		}
-    
-    		bool operator!=(const Iterator& other) {
-    			return !operator==(other);
-    		}
-    
-    	private:
-    		util::Stringview sv_;
-    		util::Stringview key_;
-    		util::Stringview value_;
-				bool eof_;
-    		void _ParseNextEntry() {
-    			GetLengthPrefixedString(sv_, key_);
-    			GetLengthPrefixedString(sv_, value_);
-    		}	
-    }; */
-
 
 }
 
@@ -124,6 +81,9 @@ util::Stringview BlockBuilder::Finish() {
 }
 
 
+std::unique_ptr<Iterator> Block::NewIterator() {
+	return std::make_unique<BlockIterator>(*this);
+}
 
 
 } //table

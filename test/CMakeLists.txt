@@ -20,4 +20,9 @@ add_executable(block_test block_test.cpp)
 target_link_libraries(block_test kvdb gtest gmock_main)
 add_test(NAME block_test COMMAND block_test)
 
+add_executable(block1_test block1_test.cpp)
+target_link_libraries(block1_test kvdb gtest gmock_main)
+add_test(NAME block1_test COMMAND block1_test)
+
+
 
