@@ -72,6 +72,11 @@ const char* Stringview::Data() const {
 	return start_;
 }
 
+void Stringview::Clear() {
+	start_ = nullptr;
+	length_ = 0;
+}
+
 bool operator==(const Stringview& sv1, const Stringview& sv2) {
 	return (sv1.Size() == sv2.Size()) && 
 				 (strncmp(sv1.Data(), sv2.Data(), sv1.Size())==0);

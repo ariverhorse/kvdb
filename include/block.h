@@ -6,6 +6,7 @@
 // leveldb's sstable (will bring more advanced feature such as 
 // prefix compression, bloomfilter, etc back in the future)
 //
+// SSTable Format:
 // Block 0
 // Block 1
 // Block 2
@@ -14,8 +15,19 @@
 // Block Index
 // Footer(block handle of Index block, and magic number)
 //
-// Each block is Varint32 prefixed Key-Value pair
-// We don't do prefix comrpession here, and no block compression
+// Block Format
+// [shared_key_len][non_shared_key_len][val_len][non_shared_key][val]
+// [shared_key_len][non_shared_key_len][val_len][non_shared_key][val]
+// [shared_key_len][non_shared_key_len][val_len][non_shared_key][val]
+// [shared_key_len][non_shared_key_len][val_len][non_shared_key][val]
+// .....
+// [Restart offset1] fixint32
+// [Restart offset2] fixint32
+// ....
+// [Restart offsetN] fixint32
+// [Restart block offset] fixint32
+// (Notice that shared key len, to val_len are all varint32)
+
 
 #include <string>
 #include <cassert>
@@ -23,6 +35,7 @@
 #include "include/string_view.h"
 #include "include/varint.h"
 #include "include/iterator.h"
+#include "include/option.h"
 
 namespace kvdb {
 namespace table {
@@ -35,15 +48,21 @@ class Block {
 		//TODO(pengyuantao) add comparator interface
 		std::unique_ptr<Iterator> NewIterator();
 
-		const std::string& Content() const { return content_; }
 	private:
-		const std::string& content_;	
+		const std::string& content_;
+		class BlockIterator;
 };
 
 // A data block contains key value pair
 class BlockBuilder {
 	public:
-		BlockBuilder() = default;
+		BlockBuilder(Option& option) :
+			restart_interval_(option.block_restart_interval),
+      counter_(0){
+      key_.clear();
+      restarts_.push_back(0);
+		}
+
     virtual ~BlockBuilder() = default;
 
 		virtual void Add(const util::Stringview& key,
@@ -52,6 +71,10 @@ class BlockBuilder {
 
 	private:
 		std::string content_;	
+    std::string key_;
+    int counter_;
+		int restart_interval_;
+    std::vector<int32_t> restarts_;
 };
 
 //Block handle contens the location and size of the block 

@@ -1,4 +1,5 @@
 #include "include/block.h"
+#include "include/option.h"
 #include "gtest/gtest.h"
 
 #include <iostream>
@@ -23,7 +24,9 @@ TEST(BlockTest, BlockWriteAndRead) {
 		{"KkkkkkkkkkkEY9", "hello world"}
 	};
 
-	BlockBuilder block_builder;
+	Option option;
+	option.block_restart_interval = 12;
+	BlockBuilder block_builder(option);
 	for(auto& dt : data) {
 		block_builder.Add(dt.first, dt.second);
 	}

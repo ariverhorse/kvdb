@@ -43,7 +43,9 @@ class Stringview {
 	bool StartsWith(const Stringview& other) const;
 
 	const char* Data() const;
- 
+
+	void Clear();
+
  private:
 	const char* start_;
   size_t length_;	
