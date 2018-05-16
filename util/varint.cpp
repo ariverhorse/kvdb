@@ -30,7 +30,7 @@ bool GetFix32(Stringview& buf, uint32_t& data) {
 	for(int i=3; i>=0; --i) {
 		data <<= 8;
 		data |= static_cast<unsigned char>(buf[i]);
-	}	
+	}
 	buf.RemovePrefix(4);
 	return true;
 }
