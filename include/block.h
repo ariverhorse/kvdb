@@ -32,6 +32,7 @@
 #include <string>
 #include <cassert>
 #include <memory>
+#include <vector>
 #include "include/string_view.h"
 #include "include/varint.h"
 #include "include/iterator.h"

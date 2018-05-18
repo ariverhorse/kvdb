@@ -42,6 +42,8 @@ class Stringview {
 
 	bool StartsWith(const Stringview& other) const;
 
+	int Compare(const Stringview& other) const;
+
 	const char* Data() const;
 
 	void Clear();

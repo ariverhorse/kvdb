@@ -1,6 +1,7 @@
 #include "include/string_view.h"
 #include <cstring>
 #include <cassert>
+#include <algorithm>
 
 namespace kvdb {
 namespace util {
@@ -75,6 +76,19 @@ const char* Stringview::Data() const {
 void Stringview::Clear() {
 	start_ = nullptr;
 	length_ = 0;
+}
+
+int Stringview::Compare(const Stringview& other) const {
+	int minlen = std::min(Size(), other.Size());
+	int result = memcmp(Data(), other.Data(), minlen);
+	if(result == 0) {
+		if(Size() < other.Size()) {
+			return -1;	
+		} else {
+			return 1;
+		}
+	}
+	return result;
 }
 
 bool operator==(const Stringview& sv1, const Stringview& sv2) {

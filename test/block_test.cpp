@@ -13,19 +13,20 @@ namespace table {
 
 TEST(BlockTest, BlockWriteAndRead) {
 	std::vector<std::pair<std::string, std::string>> data={
-		{"K1", "1234"},
-		{"KxxxEY2", "56789"},
-		{"KrrrrrrrrrrY3", "00000000000"},
-		{"4", "pyt"},
-		{"Kk5", "hello world"},
-		{"KEY6", "This is sstable"},
-		{"KEY7", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},
-		{"KEY8", "oooooooooooo"},
-		{"KkkkkkkkkkkEY9", "hello world"}
+		{"A", "1234"},
+		{"AA", "56789"},
+		{"AAA", "0000xxx0000"},
+		{"B", "pyt"},
+		{"BB", "hello world"},
+		{"BBB", "This is sstable"},
+		{"C", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},
+		{"CC", "oooooooooooo"},
+		{"CCC", "hello world"},
+		{"DDD", "This is end"},
 	};
 
 	Option option;
-	option.block_restart_interval = 12;
+	option.block_restart_interval = 3; 
 	BlockBuilder block_builder(option);
 	for(auto& dt : data) {
 		block_builder.Add(dt.first, dt.second);
@@ -46,6 +47,39 @@ TEST(BlockTest, BlockWriteAndRead) {
 
 }
 
+
+TEST(BlockTest, SeekTarget) {
+	std::vector<std::pair<std::string, std::string>> data={
+		{"A", "1234"},
+		{"AA", "56789"},
+		{"AAA", "0000xxx0000"},
+		{"B", "pyt"},
+		{"BB", "hello world"},
+		{"BBB", "This is sstable"},
+		{"C", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"},
+		{"CC", "oooooooooooo"},
+		{"CCC", "hello world"},
+		{"DDD", "This is end"},
+	};
+
+	Option option;
+	option.block_restart_interval = 3; 
+	BlockBuilder block_builder(option);
+	for(auto& dt : data) {
+		block_builder.Add(dt.first, dt.second);
+	}
+
+	auto buf = block_builder.Finish();
+
+	Block block(buf.ToString());
+	std::unique_ptr<Iterator> iter = block.NewIterator();
+	std::string str("BB");
+	util::Stringview target(str);
+	iter->Seek(target);
+	ASSERT_EQ(iter->Valid(), true);
+	ASSERT_EQ(iter->Key(), std::string("BB"));
+	ASSERT_EQ(iter->Value(), std::string("hello world"));
+}
 
 } //namespace table
 } //namespace kvdb

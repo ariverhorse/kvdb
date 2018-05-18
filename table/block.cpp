@@ -3,13 +3,15 @@
 #include <utility>
 #include <vector>
 #include <algorithm>
+#include <iostream>
+#include <cassert>
 
 namespace kvdb {
 namespace table {
 
 namespace {
 		
-	const char* DecodeEntry(const char* p, const char* limit, int32_t& shared, int32_t& nonshared, int32_t& vallen) {
+	const char* DecodeEntry(const char* p, const char* limit, uint32_t& shared, uint32_t& nonshared, uint32_t& vallen) {
 		if((p = util::GetVar32Ptr(p, limit, shared)) == nullptr) {
 			return nullptr;
 		}
@@ -19,11 +21,15 @@ namespace {
 		if((p = util::GetVar32Ptr(p, limit, vallen)) == nullptr) {
 			return nullptr;
 		}
-		if(static_cast<int32_t>(limit-p) < (*nonshared+*vallen)) {
+		if(static_cast<uint32_t>(limit-p) < (nonshared+vallen)) {
 			return nullptr;
 		}
 		return p;
-	}			
+	}
+
+	bool compare(util::Stringview key1, util::Stringview key2) {
+		return key1.Compare(key2)<=0;
+	}		
 }
 
 class Block::BlockIterator : public Iterator {
@@ -32,9 +38,9 @@ class Block::BlockIterator : public Iterator {
 		  data_(block.content_.c_str()),
 			size_(block.content_.size()),
 			num_restart_(_GetNumRestarts()),
-			restart_offset_(size_-(1+num_restart_)*sizeof(int32_t)),
+			restart_offset_(size_-(1+num_restart_)*sizeof(uint32_t)),
 			cur_offset_(restart_offset_),
-			current_restart_index_(num_restart_){
+			cur_restart_index_(num_restart_){
       cur_key_.clear();
       cur_val_.Clear();
 		}
@@ -70,29 +76,63 @@ class Block::BlockIterator : public Iterator {
 		}
 
 		void Seek(const util::Stringview& target) {
-
-
+			//Binary search for restart
+			int start = 0;
+			int end = num_restart_-1;
+			while(start < end) {
+				int mid = (start+end+1)/2;
+				uint32_t offset = _GetRestartOffset(mid);
+				uint32_t shared;
+				uint32_t nonshared;
+				uint32_t vallen;
+				const char* p = DecodeEntry(data_+offset, data_+restart_offset_, shared, nonshared, vallen);
+				assert(shared==0);	
+				util::Stringview midkey=util::Stringview(p, nonshared);
+				bool result = compare(midkey, target);
+				if(result) {
+					start = mid;
+				} else {
+					end = mid-1;
+				}	
+			}
+			//start is the offset 	
+			_SeekToRestart(start);			
+			_ParseCurrentKeyValue();
+			if(!compare(util::Stringview(cur_key_), target)) {
+				cur_offset_ = restart_offset_;
+				cur_key_.clear();
+				cur_val_.Clear();
+				return;	
+			}
+			while(compare(util::Stringview(cur_key_), target)) {
+				Next();	
+				if(cur_offset_ >= restart_offset_) {
+					break;
+				} 
+			}	
 		}
 
 	private:
 		const char* data_;
-		int32_t size_;
-		int32_t num_restart_;
-		int32_t restart_offset_;	
+		uint32_t size_;
+		uint32_t num_restart_;
+		uint32_t restart_offset_;	
 
-		int32_t cur_offset_; //current offset	
-		int32_t cur_restart_index_; //current restart index
+		uint32_t cur_offset_; //current offset	
+		uint32_t cur_restart_index_; //current restart index
 		std::string cur_key_;  //current key
 		util::Stringview cur_val_; //current value
 	
-		int32_t _GetNumRestarts() {
-			util::Stringview sv(data_+size_- sizeof(int32_t), sizeof(int32_t));
-			util::GetFix32(sv, num_restart_);	
+		uint32_t _GetNumRestarts() {
+			uint32_t num_restart;
+			util::Stringview sv(data_+size_- sizeof(uint32_t), sizeof(uint32_t));
+			util::GetFix32(sv, num_restart);	
+			return num_restart;
 		}
-	
-		int32_t _GetRestartOffset(int index) {
-			util::Stringview sv(data_+restart_offset_+index*sizeof(int32_t), sizeof(int32_t));
-			int32_t offset;
+
+		uint32_t _GetRestartOffset(int index) {
+			util::Stringview sv(data_+restart_offset_+index*sizeof(uint32_t), sizeof(uint32_t));
+			uint32_t offset;
 			util::GetFix32(sv, offset);
 			return offset;
 		}
@@ -109,9 +149,9 @@ class Block::BlockIterator : public Iterator {
 		}
 
 		void _ParseCurrentKeyValue() {
-			int32_t shared;
-			int32_t nonshared;
-			int32_t vallen;
+			uint32_t shared;
+			uint32_t nonshared;
+			uint32_t vallen;
 			const char* p = DecodeEntry(data_+cur_offset_, data_+restart_offset_, shared, nonshared, vallen);
 			if(p==nullptr) {
 				_CorruptionError();
@@ -120,7 +160,7 @@ class Block::BlockIterator : public Iterator {
 			cur_key_.resize(shared);
 			cur_key_.append(p, nonshared);
 			cur_val_ = util::Stringview(p+nonshared, vallen);
-			if(cur_restart_index_+1 < num_restarts_ && cur_offset_ >= _GetRestartOffset(cur_restart_index_+1)) {
+			if(cur_restart_index_+1 < num_restart_ && cur_offset_ >= _GetRestartOffset(cur_restart_index_+1)) {
 				++cur_restart_index_;
 			}
 		}
@@ -129,9 +169,9 @@ class Block::BlockIterator : public Iterator {
 void BlockBuilder::Add(const util::Stringview& key,
 								const util::Stringview& value) {
 
-  int32_t shared = 0;
-  int32_t nonshared = 0;
-  int32_t vallen = value.Size();
+  uint32_t shared = 0;
+  uint32_t nonshared = 0;
+  uint32_t vallen = value.Size();
   int minlen = std::min(key.Size(), key_.size());
   if(counter_ == restart_interval_) {
     counter_ = 0;
@@ -149,9 +189,8 @@ void BlockBuilder::Add(const util::Stringview& key,
   util::PutVar32(content_, shared);
   util::PutVar32(content_, nonshared);
   util::PutVar32(content_, vallen);
-  key.RemovePrefix(shared);
-  content_ += key.ToString();
-  content_ += value.ToString();
+	content_.append(key.Data()+shared, nonshared);
+	content_.append(value.Data(), value.Size());
   key_.resize(shared);
   key_.append(key.Data()+shared, nonshared);
   ++counter_;
